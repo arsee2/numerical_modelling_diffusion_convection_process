@@ -23,7 +23,7 @@ def read_buildings(path_to_buildings):
     for line in file:
         sp = line.split(" ")
 
-        x1, y2, x2, y1 = float(sp[0]), 1-float(sp[1]), float(sp[2]), 1-float(sp[3])
+        x1, y2, x2, y1 = float(sp[0]), 1 - float(sp[1]), float(sp[2]), 1 - float(sp[3])
         buildings.append((x1, y1, x2, y2))
 
     return buildings
@@ -157,8 +157,8 @@ class ConvectionDiffusion:
 
         for f in range(self.max_t):
             x_new = A @ x + b
-            error = np.max(np.abs(x_new - x))
-            if f % 500 == 0:
+            error = np.max(np.abs((x_new - x) / np.maximum(1, x)))
+            if f % 100 == 0:
                 frames.append(x_new.reshape((self.N + 1, self.N + 1)))
                 print(error)
             if error < self.eps:
@@ -182,26 +182,26 @@ def animate(frames):
         im = plt.imshow(frame, animated=True)
         ims.append([im])
         i += 1
-        if i > 1000:
-            break
+
     plt.colorbar(im)
+
     Writer = animation.writers['ffmpeg']
-    writer = Writer(fps=10, metadata=dict(artist='Me'), bitrate=100)
+    writer = Writer(fps=60, metadata=dict(artist='Me'), bitrate=260)
     ani = animation.ArtistAnimation(fig, ims, interval=17, blit=True,
                                     repeat_delay=1000)
-
-    ani.save('diffusion.mp4',writer=writer)
+    # ani.save('diffusion.html')
+    ani.save('diffusion.mp4', writer=writer)
 
     plt.show()
 
 
 if __name__ == "__main__":
     max_t = 100000
-    l_1 = 10
+    l_1 = 1
     l_2 = 0.0
     k = 0.5
     N = 300
-    eps = 1e-5
+    eps = 1e-6
 
     buildings = read_buildings("buildings.txt")
     cond_func = get_cond_check_func(buildings)
